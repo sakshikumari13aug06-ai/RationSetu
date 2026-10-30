@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RationSetu - Smart PDS Ration Card Prototype</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .pulse-ring {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .7; transform: scale(1.08); }
+    }
+    .qr-pattern {
+      background-image: radial-gradient(#1e293b 2px, transparent 2px);
+      background-size: 8px 8px;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.2);
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen">
+
+  <!-- TOP BAR: Prototype Navigation & Design Thinking Meta Bar -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 sm:px-6 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center font-bold text-slate-950 text-lg shadow-sm">
+          🌾
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-bold tracking-tight text-white text-base">RationSetu</span>
+            <span class="text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">Design Thinking Prototype</span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">Public Distribution System (PDS) Beneficiary Empowerment</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Tabs for Design Thinking Evaluation -->
+      <div class="flex items-center space-x-2">
+        <button id="viewBeneficiaryBtn" onclick="switchView('beneficiary')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 shadow transition flex items-center space-x-1">
+          <span>📱 Beneficiary</span>
+        </button>
+        <button id="viewDealerBtn" onclick="switchView('dealer')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center space-x-1">
+          <span>🏪 Dealer e-PoS</span>
+        </button>
+        <button id="toggleTeamRolesBtn" onclick="toggleTeamModal()" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-400 text-slate-950 hover:bg-amber-300 shadow transition flex items-center space-x-1">
+          <span>👥 3-Member Guide</span>
+        </button>
+        <button id="toggleDtDrawerBtn" onclick="toggleDtModal()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-500 shadow transition flex items-center space-x-1">
+          <span>🎯 DT Matrix</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3-PILLAR BANNER: The exact core questions from user request -->
+  <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-indigo-900/50 text-white py-3 px-4 shadow-sm">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+      
+      <!-- Point 1 -->
+      <div class="bg-white/5 border border-white/10 rounded-lg p-2.5 flex items-start space-x-2.5">
+        <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">1</span>
+        <div>
+          <div class="font-bold text-emerald-400 uppercase tracking-wider text-[10px]">User Interaction Point</div>
+          <div class="text-slate-200 font-medium">Pre-Visit Smart Touchpoint</div>
+          <div class="text-slate-400 text-[11px] leading-tight mt-0.5">Beneficiary checks live FPS status & reserves time-slot before leaving home/work, preventing wasted day-wages.</div>
+        </div>
+      </div>
+
+      <!-- Point 2 -->
+      <div class="bg-white/5 border border-white/10 rounded-lg p-2.5 flex items-start space-x-2.5">
+        <span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0">2</span>
+        <div>
+          <div class="font-bold text-amber-400 uppercase tracking-wider text-[10px]">Single Element Addressing Difficulty</div>
+          <div class="text-slate-200 font-medium">Guaranteed Stock & Fast-Pass Token Card</div>
+          <div class="text-slate-400 text-[11px] leading-tight mt-0.5">Combines live grain inventory, queue time estimate & tamper-proof offline QR token to end uncertainty.</div>
+        </div>
+      </div>
+
+      <!-- Point 3 -->
+      <div class="bg-white/5 border border-white/10 rounded-lg p-2.5 flex items-start space-x-2.5">
+        <span class="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-xs shrink-0">3</span>
+        <div>
+          <div class="font-bold text-rose-400 uppercase tracking-wider text-[10px]">What We Do Not Yet Know Will Work</div>
+          <div class="text-slate-200 font-medium">Dealer Compliance vs. Walk-In Queue Tension</div>
+          <div class="text-slate-400 text-[11px] leading-tight mt-0.5">Will FPS dealers honor digital reservations when 50 walk-ins are physically protesting at the counter?</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- LEFT / MAIN COLUMN: Interactive Mobile Screen Emulator -->
+      <div class="lg:col-span-7 xl:col-span-6 flex flex-col items-center">
+        
+        <!-- Mobile Frame Header Controls -->
+        <div class="w-full max-w-sm mb-2 flex items-center justify-between text-xs text-slate-500 px-1">
+          <div class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="font-medium text-slate-700">Simulated 4G PDS Network</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="toggleOfflineSim()" id="networkToggleBtn" class="px-2 py-0.5 rounded bg-slate-200 hover:bg-slate-300 text-[11px] font-semibold text-slate-700 transition">
+              📶 Online Mode
+            </button>
+            <button onclick="toggleLanguage()" id="langToggleBtn" class="px-2 py-0.5 rounded bg-indigo-100 hover:bg-indigo-200 text-[11px] font-semibold text-indigo-800 transition">
+              🌐 हिन्दी / EN
+            </button>
+          </div>
+        </div>
+
+        <!-- SMARTPHONE CHASSIS -->
+        <div class="w-full max-w-sm bg-slate-900 rounded-[40px] p-3 shadow-2xl border-4 border-slate-800 relative">
+          
+          <!-- Speaker Notch & Camera -->
+          <div class="absolute top-5 left-1/2 -translate-x-1/2 w-28 h-4 bg-slate-950 rounded-full flex items-center justify-center space-x-2 z-30">
+            <div class="w-2 h-2 rounded-full bg-slate-800"></div>
+            <div class="w-10 h-1 bg-slate-800 rounded-full"></div>
+          </div>
+
+          <!-- Phone Inner Screen Content (Scrollable) -->
+          <div id="phoneScreen" class="bg-slate-50 text-slate-900 rounded-[32px] overflow-hidden min-h-[640px] max-h-[720px] overflow-y-auto flex flex-col relative pt-6 select-none">
+            
+            <!-- In-Phone Header -->
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-4 pt-3 pb-5 relative">
+              <div class="flex items-center justify-between text-xs mb-3">
+                <button onclick="toggleMapModal()" class="flex items-center space-x-1.5 bg-black/25 hover:bg-black/40 backdrop-blur-sm px-2.5 py-1 rounded-full text-left transition cursor-pointer group">
+                  <span class="text-xs group-hover:scale-110 transition">📍</span>
+                  <span class="font-semibold text-[11px] text-white" id="txtShopLocation">Shop #402 - Ward 12</span>
+                  <span class="text-[9px] bg-emerald-400 text-slate-950 font-bold px-1.5 py-0.2 rounded-full ml-1">Map ↗</span>
+                </button>
+                <!-- Status Badge -->
+                <div class="flex items-center space-x-1.5 bg-black/20 backdrop-blur-sm px-2.5 py-1 rounded-full text-[11px] text-emerald-200 font-semibold">
+                  <span>🟢</span>
+                  <span id="txtPdsOnline">NFSA Verified</span>
+                </div>
+              </div>
+
+              <!-- Beneficiary Profile Card -->
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[11px] text-emerald-100 font-medium uppercase tracking-wider" id="txtCardType">Antyodaya Anna Yojana (AAY)</div>
+                  <h1 class="text-lg font-extrabold text-white leading-tight" id="txtUserName">Ramesh Kumar</h1>
+                  <p class="text-[11px] text-emerald-100 font-mono mt-0.5">RC No: 0720-9481-2094</p>
+                </div>
+                <div class="bg-white/15 backdrop-blur-md rounded-xl p-2 text-center border border-white/20">
+                  <div class="text-[10px] text-emerald-100 uppercase" id="txtFamilyMembers">Family</div>
+                  <div class="text-sm font-extrabold text-white">4 <span class="text-[10px] font-normal">Aadhaar</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- VIEW A: BENEFICIARY SCREENS -->
+            <div id="beneficiaryViewContainer" class="p-3.5 space-y-3.5 flex-1">
+
+              <!-- MEMBER 1 SPOTLIGHT: Interactive Wage & Journey Impact Switcher -->
+              <div class="bg-indigo-50/70 border border-indigo-200/80 rounded-2xl p-2.5 shadow-2xs">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-[10px] font-bold text-indigo-900 uppercase tracking-tight flex items-center space-x-1">
+                    <span class="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[9px] font-extrabold">M1</span>
+                    <span>Daily Wage & Queue Impact</span>
+                  </span>
+                  <div class="inline-flex rounded-lg bg-indigo-200/60 p-0.5 text-[9px] font-bold">
+                    <button id="btnOldPds" onclick="toggleJourneyImpact('old')" class="px-2 py-0.5 rounded-md text-indigo-900 transition">Old PDS</button>
+                    <button id="btnNewPds" onclick="toggleJourneyImpact('new')" class="px-2 py-0.5 rounded-md bg-indigo-700 text-white shadow-xs transition">RationSetu</button>
+                  </div>
+                </div>
+                <div id="journeyImpactDisplay" class="grid grid-cols-3 gap-1.5 text-center text-xs">
+                  <div class="bg-white rounded-lg p-1.5 border border-indigo-100">
+                    <span class="text-[9px] text-slate-500 block uppercase">Queue Time</span>
+                    <span class="font-extrabold text-emerald-700 text-xs" id="impactTime">12 mins</span>
+                  </div>
+                  <div class="bg-white rounded-lg p-1.5 border border-indigo-100">
+                    <span class="text-[9px] text-slate-500 block uppercase">Day's Wage</span>
+                    <span class="font-extrabold text-emerald-700 text-xs" id="impactWage">₹500 Saved</span>
+                  </div>
+                  <div class="bg-white rounded-lg p-1.5 border border-indigo-100">
+                    <span class="text-[9px] text-slate-500 block uppercase">Stock Guarantee</span>
+                    <span class="font-extrabold text-emerald-700 text-xs" id="impactStock">100% Locked</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ======================================================== -->
+              <!-- THE CORE "SINGLE ELEMENT": Guaranteed Stock & Token Hero Card -->
+              <!-- ======================================================== -->
+              <div id="heroSingleElementCard" class="bg-white rounded-2xl p-4 shadow-sm border-2 border-emerald-500/60 relative overflow-hidden transition-all duration-300 hover:shadow-md">
+                
+                <!-- Highlight Ribbon -->
+                <div class="absolute -top-1 -right-1 bg-emerald-600 text-white text-[9px] font-bold px-3 py-1 rounded-bl-xl shadow-xs uppercase tracking-wider flex items-center space-x-1">
+                  <span>⭐ Core Solution</span>
+                </div>
+
+                <div class="flex items-center justify-between mb-2.5">
+                  <div class="flex items-center space-x-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-ring"></span>
+                    <span class="text-xs font-bold text-slate-900 uppercase tracking-tight" id="txtCardTitle">Live Shop & Stock Status</span>
+                  </div>
+                  <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full" id="txtShopStatusBadge">🟢 OPEN (Till 7 PM)</span>
+                </div>
+
+                <!-- Live FPS Crowd & Wait Time -->
+                <div class="grid grid-cols-2 gap-2 mb-3 bg-slate-50 rounded-xl p-2.5 border border-slate-100 text-xs">
+                  <div>
+                    <span class="text-[10px] text-slate-500 block uppercase" id="txtWaitTimeLabel">Current Wait Time</span>
+                    <span class="font-extrabold text-slate-900 text-sm" id="txtWaitTimeVal">~12 Mins</span>
+                    <span class="text-[10px] text-emerald-600 font-semibold block" id="txtQueueCount">8 people in queue</span>
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-slate-500 block uppercase" id="txtGrainStatusLabel">Grain Availability</span>
+                    <span class="font-extrabold text-emerald-600 text-sm" id="txtStockStatusVal">100% In Stock</span>
+                    <span class="text-[10px] text-slate-500 block" id="txtDealerName">Dealer: S. Sharma</span>
+                  </div>
+                </div>
+
+                <!-- Monthly Entitlement Gauge -->
+                <div class="space-y-2 mb-3">
+                  <div class="flex justify-between items-center text-xs">
+                    <span class="font-semibold text-slate-700" id="txtEntitlementLabel">October 2026 Quota Balance</span>
+                    <span class="text-emerald-700 font-bold" id="txtQuotaTotal">30 kg Remaining</span>
+                  </div>
+                  
+                  <!-- Items breakdown -->
+                  <div class="grid grid-cols-3 gap-1.5 text-center">
+                    <div class="bg-amber-50/70 border border-amber-200/60 rounded-lg p-1.5">
+                      <span class="text-[10px] text-amber-800 font-bold block" id="txtItemRice">Rice (चावल)</span>
+                      <span class="text-xs font-extrabold text-slate-900">20 kg</span>
+                      <span class="text-[9px] text-emerald-600 font-semibold block">₹0 / Free</span>
+                    </div>
+                    <div class="bg-amber-50/70 border border-amber-200/60 rounded-lg p-1.5">
+                      <span class="text-[10px] text-amber-800 font-bold block" id="txtItemWheat">Wheat (गेहूं)</span>
+                      <span class="text-xs font-extrabold text-slate-900">10 kg</span>
+                      <span class="text-[9px] text-emerald-600 font-semibold block">₹0 / Free</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-1.5">
+                      <span class="text-[10px] text-slate-700 font-bold block" id="txtItemSugar">Sugar (चीनी)</span>
+                      <span class="text-xs font-extrabold text-slate-900">1 kg</span>
+                      <span class="text-[9px] text-slate-600 block">₹13.50</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SLOT & TOKEN STATE (Interactive Toggle) -->
+                <div id="unbookedSlotSection">
+                  <!-- MEMBER 2 SPOTLIGHT: Family Nominee Collector Delegation -->
+                  <div class="mb-2.5 bg-slate-50 rounded-xl p-2 border border-slate-200">
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-[10px] font-bold text-slate-700 uppercase tracking-tight flex items-center space-x-1">
+                        <span class="w-3.5 h-3.5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[8px] font-extrabold">M2</span>
+                        <span>Collecting Family Member:</span>
+                      </label>
+                      <span class="text-[9px] text-emerald-700 font-semibold bg-emerald-100/60 px-1.5 py-0.2 rounded">Aadhaar Linked</span>
+                    </div>
+                    <select id="collectorSelect" onchange="updateCollector(this.value)" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-1.5 font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                      <option value="Ramesh Kumar (Self - Head)">👤 Ramesh Kumar (Self - Head)</option>
+                      <option value="Sunita Devi (Spouse - Aadhaar ***8120)">👩 Sunita Devi (Spouse - Aadhaar ***8120)</option>
+                      <option value="Amit Kumar (Son, 16 - Nominee)">👦 Amit Kumar (Son, 16 - Nominee)</option>
+                    </select>
+                  </div>
+
+                  <!-- Time Slot Picker -->
+                  <div class="mb-3">
+                    <label class="text-[11px] font-bold text-slate-700 block mb-1.5" id="txtSelectSlotLabel">Select Fast-Track Pickup Slot:</label>
+                    <div class="grid grid-cols-2 gap-1.5 text-xs">
+                      <button onclick="selectSlotTime('today_4pm')" id="slotBtn1" class="slot-option border-2 border-emerald-500 bg-emerald-50 text-emerald-950 font-bold p-2 rounded-xl text-left transition">
+                        <div class="text-[11px]" id="slot1Title">Today, 4:00 - 4:30 PM</div>
+                        <div class="text-[9px] text-emerald-700 font-semibold" id="slot1Fast">⚡ 4 slots remaining</div>
+                      </button>
+                      <button onclick="selectSlotTime('today_5pm')" id="slotBtn2" class="slot-option border border-slate-200 bg-white text-slate-700 font-medium p-2 rounded-xl text-left hover:border-slate-300 transition">
+                        <div class="text-[11px]" id="slot2Title">Today, 5:30 - 6:00 PM</div>
+                        <div class="text-[9px] text-slate-500" id="slot2Fast">11 slots available</div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- 1-Tap CTA Buttons -->
+                  <div class="space-y-1.5">
+                    <button onclick="bookGuaranteedSlot()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold py-3 px-4 rounded-xl shadow-md text-xs sm:text-sm flex items-center justify-center space-x-2 transition">
+                      <span>🎟️</span>
+                      <span id="txtBookBtn">Lock My Quota & Get Fast-Pass Token</span>
+                    </button>
+                    <!-- SMS Booking Option (Offline/Feature Phone) -->
+                    <button onclick="toggleSmsModal()" class="w-full bg-slate-800 hover:bg-slate-700 active:scale-[0.99] text-slate-200 font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center space-x-1.5 transition border border-slate-700 shadow-xs">
+                      <span>📲</span>
+                      <span>Book via Free SMS (Zero Internet / Keypad Phone)</span>
+                    </button>
+                  </div>
+                  <p class="text-[10px] text-slate-400 text-center mt-1.5" id="txtTokenNote">Locks your stock for 24 hours. No line waiting.</p>
+                </div>
+
+                <!-- GENERATED TOKEN ACTIVE STATE (Shown after booking) -->
+                <div id="bookedTokenSection" class="hidden space-y-2.5 pt-1">
+                  <div class="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-xl p-3 text-white text-center shadow-inner relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-white/10 rounded-full"></div>
+                    
+                    <div class="flex items-center justify-between text-[11px] mb-1">
+                      <span class="bg-white/20 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider">Fast-Pass Token</span>
+                      <span class="text-emerald-200 font-medium" id="txtConfirmedSlotTime">Today @ 4:15 PM</span>
+                    </div>
+
+                    <!-- Token ID & QR -->
+                    <div class="my-2 bg-white text-slate-950 p-2.5 rounded-lg inline-block shadow-md">
+                      <div class="w-28 h-28 mx-auto qr-pattern bg-white border border-slate-300 rounded flex flex-col items-center justify-center relative">
+                        <!-- Simulated QR corners -->
+                        <div class="absolute top-1 left-1 w-5 h-5 border-2 border-slate-900 rounded-xs"></div>
+                        <div class="absolute top-1 right-1 w-5 h-5 border-2 border-slate-900 rounded-xs"></div>
+                        <div class="absolute bottom-1 left-1 w-5 h-5 border-2 border-slate-900 rounded-xs"></div>
+                        <div class="w-8 h-8 bg-emerald-600 rounded flex items-center justify-center text-white text-xs font-black">
+                          RS
+                        </div>
+                      </div>
+                      <div class="text-sm font-black font-mono tracking-widest text-slate-900 mt-1" id="txtGeneratedTokenId">TOKEN #TK-482</div>
+                    </div>
+
+                    <div class="text-xs font-bold text-white mb-0.5" id="txtQuotaLockedHeading">30 kg Grains Reserved for 24 Hrs</div>
+                    <div class="text-[10px] text-emerald-100 flex items-center justify-center space-x-1">
+                      <span>🔒 Offline cryptographic sign active</span>
+                    </div>
+                  </div>
+
+                  <!-- Actions for this active token -->
+                  <div class="grid grid-cols-2 gap-2 text-xs">
+                    <button onclick="downloadTokenPass()" class="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-bold flex items-center justify-center space-x-1 transition text-[11px]">
+                      <span>📥</span>
+                      <span id="txtSaveToken">Save Token Pass</span>
+                    </button>
+                    <button onclick="simulateDealerScanFromApp()" class="p-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-900 font-bold flex items-center justify-center space-x-1 transition text-[11px]">
+                      <span>🏪</span>
+                      <span>Test at Dealer POS</span>
+                    </button>
+                  </div>
+                  
+                  <button onclick="cancelTokenBooking()" class="w-full text-center text-[10px] text-slate-400 hover:text-rose-500 py-1 transition">
+                    Change Slot or Cancel Token
+                  </button>
+                </div>
+
+              </div>
+
+              <!-- INTERACTIVE MAP & ROUTE CARD -->
+              <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center space-x-1.5">
+                    <span class="text-sm">🗺️</span>
+                    <div>
+                      <span class="text-xs font-bold text-slate-800 block">Live FPS Map & Nearby Shops (5 Locations)</span>
+                      <span class="text-[9px] text-slate-500">Tap any shop to route & check queue</span>
+                    </div>
+                  </div>
+                  <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold" id="mapRouteBadge">1.2 km • 14 min walk</span>
+                </div>
+
+                <!-- Stylized SVG Map Component (with 5 Shops) -->
+                <div class="relative w-full h-48 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-inner select-none">
+                  <svg class="w-full h-full" viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background terrain -->
+                    <rect width="320" height="190" fill="#f8fafc"/>
+                    
+                    <!-- Parks & Neighborhoods -->
+                    <rect x="15" y="15" width="70" height="45" rx="8" fill="#dcfce7" opacity="0.65"/>
+                    <text x="25" y="38" font-size="7.5" fill="#15803d" font-weight="bold">City Park</text>
+                    
+                    <rect x="230" y="105" width="75" height="55" rx="8" fill="#e0e7ff" opacity="0.55"/>
+                    <text x="240" y="132" font-size="7.5" fill="#4338ca" font-weight="bold">Metro Depot</text>
+
+                    <!-- Road Grid -->
+                    <path d="M 0 95 Q 120 90 320 95" stroke="#cbd5e1" stroke-width="14" fill="none" stroke-linecap="round"/>
+                    <path d="M 0 95 Q 120 90 320 95" stroke="#f8fafc" stroke-width="10" fill="none" stroke-linecap="round"/>
+                    
+                    <path d="M 100 0 L 100 190" stroke="#cbd5e1" stroke-width="12" fill="none"/>
+                    <path d="M 100 0 L 100 190" stroke="#f8fafc" stroke-width="8" fill="none"/>
+
+                    <path d="M 210 0 L 210 190" stroke="#cbd5e1" stroke-width="10" fill="none"/>
+                    <path d="M 210 0 L 210 190" stroke="#f8fafc" stroke-width="6" fill="none"/>
+
+                    <!-- Walking Navigation Path -->
+                    <path id="svgWalkingRoute" d="M 60 145 L 100 145 L 100 95 L 180 95 L 180 45" stroke="#059669" stroke-width="3" stroke-dasharray="4,3" fill="none"/>
+
+                    <!-- Point A: Ramesh Current Location (Blue Dot) -->
+                    <g transform="translate(60, 145)" class="cursor-pointer" onclick="selectMapPin('user')">
+                      <circle r="11" fill="#3b82f6" opacity="0.25" class="animate-ping"/>
+                      <circle r="5" fill="#2563eb" stroke="#ffffff" stroke-width="1.8"/>
+                      <rect x="-32" y="8" width="64" height="13" rx="3" fill="#1e293b" opacity="0.9"/>
+                      <text x="0" y="17.5" font-size="6.5" fill="#ffffff" font-weight="bold" text-anchor="middle">📍 You (Worksite)</text>
+                    </g>
+
+                    <!-- Shop 1: Primary #402 (Green Pin) -->
+                    <g id="pinShop402" transform="translate(180, 45)" class="cursor-pointer" onclick="selectShopLocation('402')">
+                      <circle r="12" fill="#10b981" opacity="0.3"/>
+                      <path d="M 0 -12 C -6 -12 -8 -6 0 5 C 8 -6 6 -12 0 -12 Z" fill="#059669" stroke="#ffffff" stroke-width="1.2"/>
+                      <circle cx="0" cy="-5" r="3" fill="#ffffff"/>
+                      <rect x="-35" y="-25" width="70" height="13" rx="3" fill="#064e3b" opacity="0.95"/>
+                      <text x="0" y="-16" font-size="6.5" fill="#ffffff" font-weight="bold" text-anchor="middle">#402 Sharma</text>
+                    </g>
+
+                    <!-- Shop 2: Metro #108 (Purple Pin) -->
+                    <g id="pinShop108" transform="translate(265, 100)" class="cursor-pointer" onclick="selectShopLocation('108')">
+                      <circle r="10" fill="#8b5cf6" opacity="0.25"/>
+                      <path d="M 0 -10 C -5 -10 -7 -5 0 4 C 7 -5 5 -10 0 -10 Z" fill="#7c3aed" stroke="#ffffff" stroke-width="1"/>
+                      <circle cx="0" cy="-4" r="2.5" fill="#ffffff"/>
+                      <rect x="-32" y="-22" width="64" height="12" rx="3" fill="#4c1d95" opacity="0.95"/>
+                      <text x="0" y="-14" font-size="6.5" fill="#ffffff" font-weight="bold" text-anchor="middle">#108 Metro</text>
+                    </g>
+
+                    <!-- Shop 3: Mahila Samiti #330 (Teal Pin) -->
+                    <g id="pinShop330" transform="translate(115, 60)" class="cursor-pointer" onclick="selectShopLocation('330')">
+                      <circle r="10" fill="#0d9488" opacity="0.25"/>
+                      <path d="M 0 -10 C -5 -10 -7 -5 0 4 C 7 -5 5 -10 0 -10 Z" fill="#0f766e" stroke="#ffffff" stroke-width="1"/>
+                      <circle cx="0" cy="-4" r="2.5" fill="#ffffff"/>
+                      <rect x="-32" y="-22" width="64" height="12" rx="3" fill="#134e4a" opacity="0.95"/>
+                      <text x="0" y="-14" font-size="6.5" fill="#ffffff" font-weight="bold" text-anchor="middle">#330 Mahila</text>
+                    </g>
+
+                    <!-- Shop 4: Jan Aahar #215 (Amber Pin) -->
+                    <g id="pinShop215" transform="translate(245, 30)" class="cursor-pointer" onclick="selectShopLocation('215')">
+                      <circle r="9" fill="#f59e0b" opacity="0.25"/>
+                      <path d="M 0 -10 C -5 -10 -7 -5 0 4 C 7 -5 5 -10 0 -10 Z" fill="#d97706" stroke="#ffffff" stroke-width="1"/>
+                      <circle cx="0" cy="-4" r="2.5" fill="#ffffff"/>
+                      <rect x="-33" y="-22" width="66" height="12" rx="3" fill="#78350f" opacity="0.95"/>
+                      <text x="0" y="-14" font-size="6.5" fill="#ffffff" font-weight="bold" text-anchor="middle">#215 Hospital</text>
+                    </g>
+
+                    <!-- Shop 5: Old Mandi #512 (Rose Pin - Crowded) -->
+                    <g id="pinShop512" transform="translate(290, 160)" class="cursor-pointer" onclick="selectShopLocation('512')">
+                      <circle r="9" fill="#f43f5e" opacity="0.25"/>
+                      <path d="M 0 -10 C -5 -10 -7 -5 0 4 C 7 -5 5 -10 0 -10 Z" fill="#e11d48" stroke="#ffffff" stroke-width="1"/>
+                      <circle cx="0" cy="-4" r="2.5" fill="#ffffff"/>
+                      <rect x="-30" y="-22" width="60" height="12" rx="3" fill="#881337" opacity="0.95"/>
+                      <text x="0" y="-14" font-size="6.5" fill="#ffffff" font-weight="bold" text-anchor="middle">#512 Mandi</text>
+                    </g>
+                  </svg>
+
+                  <!-- Map Overlay Controls -->
+                  <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between bg-white/95 backdrop-blur-xs p-1.5 rounded-lg border border-slate-200 text-[10px]">
+                    <div class="flex items-center space-x-1.5 truncate mr-1">
+                      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                      <span class="font-bold text-slate-800 text-[10px] truncate" id="mapActiveShopLabel">Assigned: Sharma FPS #402 (1.2 km)</span>
+                    </div>
+                    <button onclick="toggleMapModal()" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold transition shrink-0">
+                      Full Map ↗
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Selectable 5-Shop Grid -->
+                <div class="mt-2.5 space-y-1.5 text-xs">
+                  <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tap to Switch Shop:</div>
+                  <div class="grid grid-cols-2 gap-1.5">
+                    
+                    <!-- 1. Sharma FPS #402 -->
+                    <button onclick="selectShopLocation('402')" id="btnSelectShop402" class="p-2 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-left transition">
+                      <div class="font-bold text-[11px] text-emerald-950 flex items-center justify-between">
+                        <span>Shop #402 (Ward 12)</span>
+                        <span class="text-[8px] bg-emerald-200 text-emerald-900 px-1 rounded font-bold">Assigned</span>
+                      </div>
+                      <div class="text-[9px] text-emerald-700 font-medium mt-0.5">1.2 km • 🟢 Queue: 8</div>
+                    </button>
+
+                    <!-- 2. Metro FPS #108 -->
+                    <button onclick="selectShopLocation('108')" id="btnSelectShop108" class="p-2 rounded-xl border border-slate-200 bg-white hover:border-slate-300 text-left transition">
+                      <div class="font-bold text-[11px] text-slate-800 flex items-center justify-between">
+                        <span>Shop #108 (Metro)</span>
+                        <span class="text-[8px] bg-purple-100 text-purple-900 px-1 rounded font-bold">Fastest</span>
+                      </div>
+                      <div class="text-[9px] text-purple-700 font-semibold mt-0.5">600m • 🟢 Queue: 3</div>
+                    </button>
+
+                    <!-- 3. Mahila Samiti #330 -->
+                    <button onclick="selectShopLocation('330')" id="btnSelectShop330" class="p-2 rounded-xl border border-slate-200 bg-white hover:border-slate-300 text-left transition">
+                      <div class="font-bold text-[11px] text-slate-800 flex items-center justify-between">
+                        <span>Shop #330 (Mahila)</span>
+                        <span class="text-[8px] bg-teal-100 text-teal-900 px-1 rounded font-bold">SHG</span>
+                      </div>
+                      <div class="text-[9px] text-teal-700 font-medium mt-0.5">850m • 🟢 Queue: 5</div>
+                    </button>
+
+                    <!-- 4. Hospital Chowk #215 -->
+                    <button onclick="selectShopLocation('215')" id="btnSelectShop215" class="p-2 rounded-xl border border-slate-200 bg-white hover:border-slate-300 text-left transition">
+                      <div class="font-bold text-[11px] text-slate-800 flex items-center justify-between">
+                        <span>Shop #215 (Hospital)</span>
+                        <span class="text-[8px] bg-amber-100 text-amber-900 px-1 rounded font-bold">Normal</span>
+                      </div>
+                      <div class="text-[9px] text-amber-700 font-medium mt-0.5">1.7 km • 🟡 Queue: 14</div>
+                    </button>
+
+                  </div>
+
+                  <!-- 5. Mandi Road #512 (Full width) -->
+                  <button onclick="selectShopLocation('512')" id="btnSelectShop512" class="w-full p-1.5 rounded-xl border border-slate-200 bg-white hover:border-slate-300 text-left transition flex items-center justify-between">
+                    <div>
+                      <span class="font-bold text-[11px] text-slate-800">Shop #512 - Old Railway Mandi</span>
+                      <span class="text-[9px] text-slate-500 ml-2">2.3 km away • ~28 min walk</span>
+                    </div>
+                    <span class="text-[9px] bg-rose-100 text-rose-800 font-bold px-1.5 py-0.2 rounded">🔴 Crowded (24 in queue)</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 24x7 HELPLINE & GRIEVANCE SUPPORT CARD -->
+              <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-2xl p-3.5 shadow-sm border border-slate-800 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-2">
+                    <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">📞</span>
+                    <div>
+                      <span class="text-xs font-bold text-white block">24x7 PDS Helpline & Grievance</span>
+                      <span class="text-[9px] text-slate-400">Department of Food & Public Distribution</span>
+                    </div>
+                  </div>
+                  <span class="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">Toll-Free</span>
+                </div>
+
+                <!-- Contact Pills Grid -->
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                  <a href="tel:1967" onclick="alert('Calling National PDS Helpline: 1967 (Toll-Free)')" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 flex items-center space-x-2 transition">
+                    <span class="text-base">☎️</span>
+                    <div>
+                      <span class="text-[9px] text-slate-300 block uppercase font-medium">National Toll-Free</span>
+                      <span class="font-extrabold text-emerald-300 text-xs">1967</span>
+                    </div>
+                  </a>
+                  <a href="tel:18001802087" onclick="alert('Calling State PDS Helpdesk: 1800-180-2087 (Toll-Free)')" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 flex items-center space-x-2 transition">
+                    <span class="text-base">📞</span>
+                    <div>
+                      <span class="text-[9px] text-slate-300 block uppercase font-medium">State Helpdesk</span>
+                      <span class="font-extrabold text-white text-[10px]">1800-180-2087</span>
+                    </div>
+                  </a>
+                </div>
+
+                <!-- Email Helpdesk -->
+                <div class="p-2 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between text-xs">
+                  <div class="flex items-center space-x-2 truncate mr-2">
+                    <span class="text-sm">✉️</span>
+                    <div class="truncate">
+                      <span class="text-[9px] text-slate-400 block uppercase">Official Support Email</span>
+                      <span class="text-[11px] font-mono text-emerald-300 font-bold truncate">grievance.pds@nic.in</span>
+                    </div>
+                  </div>
+                  <a href="mailto:grievance.pds@nic.in?subject=PDS%20Ration%20Grievance%20-%20RC%20072094812094" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[10px] font-bold shrink-0 transition">
+                    Send Email ↗
+                  </a>
+                </div>
+
+                <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-white/10">
+                  <span>Inspector V. Verma (DFSO): +91 94120 48210</span>
+                  <button onclick="toggleHelplineModal()" class="text-emerald-400 font-bold hover:underline">All Contacts ↗</button>
+                </div>
+              </div>
+
+              <!-- EMERGENCY / GRIEVANCE TRIGGER (Addresses corruption & dealer denial) -->
+              <div class="bg-rose-50/70 border border-rose-200 rounded-2xl p-3 flex items-center justify-between">
+                <div>
+                  <div class="text-[11px] font-bold text-rose-900" id="txtHelpHeading">Dealer Denied Stock?</div>
+                  <div class="text-[10px] text-rose-700" id="txtHelpSub">1-Tap Food Inspector Geo-Alert (Toll-Free 1967)</div>
+                </div>
+                <button onclick="triggerGrievanceSOS()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-[11px] font-bold shadow-sm transition active:scale-95">
+                  Report SOS
+                </button>
+              </div>
+
+            </div>
+
+            <!-- In-Phone Bottom Navigation Bar -->
+            <div class="bg-white border-t border-slate-200 px-3 py-2 flex items-center justify-between text-slate-500 text-[10px] font-medium mt-auto">
+              <button class="flex flex-col items-center text-emerald-600">
+                <span class="text-base">🏠</span>
+                <span class="font-bold" id="navHome">Home</span>
+              </button>
+              <button onclick="toggleMapModal()" class="flex flex-col items-center hover:text-slate-900 transition">
+                <span class="text-base">📍</span>
+                <span id="navMap">Map</span>
+              </button>
+              <button onclick="scrollToHeroToken()" class="flex flex-col items-center hover:text-slate-900 transition">
+                <span class="text-base">🎟️</span>
+                <span id="navToken">My Token</span>
+              </button>
+              <button onclick="showTransactionHistory()" class="flex flex-col items-center hover:text-slate-900 transition">
+                <span class="text-base">📜</span>
+                <span id="navHistory">Passbook</span>
+              </button>
+              <button onclick="showFamilyCard()" class="flex flex-col items-center hover:text-slate-900 transition">
+                <span class="text-base">👥</span>
+                <span id="navFamily">Family</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Footnote under phone -->
+        <p class="text-xs text-slate-500 mt-2 text-center max-w-sm">
+          💡 Click <strong class="text-slate-700 font-semibold">"Lock My Quota"</strong> to test the single-element token generation & offline QR pass.
+        </p>
+      </div>
+
+      <!-- RIGHT COLUMN: Interactive Testing Bench for "The Unknown" & Dealer View -->
+      <div class="lg:col-span-5 xl:col-span-6 space-y-5">
+        
+        <!-- CARD 1: Testing "The One Thing We Do Not Yet Know Will Work" -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+              <span class="text-lg">🧪</span>
+              <div>
+                <h3 class="font-bold text-slate-900 text-sm">Testing The Riskiest Assumption</h3>
+                <p class="text-xs text-slate-500">What we do NOT yet know will work in the real world</p>
+              </div>
+            </div>
+            <span class="bg-rose-100 text-rose-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Field Stress Test</span>
+          </div>
+
+          <!-- Problem statement of the unknown -->
+          <div class="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900">
+            <strong class="font-bold block mb-1">⚠️ The Core Hypothesis Under Test:</strong>
+            <em>"Will Fair Price Shop (FPS) dealers honor a digital queue token when an angry physical crowd of 50 walk-in laborers is already pushing at the shutter?"</em>
+          </div>
+
+          <!-- Interactive Test Triggers -->
+          <div class="mt-4 space-y-2.5">
+            <div class="text-xs font-bold text-slate-700">Simulate Real-World Friction Scenarios:</div>
+
+            <!-- Scenario A: Physical Walk-in Queue Conflict -->
+            <div class="p-3 rounded-xl border border-slate-200 hover:border-indigo-300 bg-slate-50/60 transition">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-xs text-slate-800">Scenario A: Walk-In Crowd vs Token Priority</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">Dealer attempts to bypass digital token holder to appease loud physical crowd.</div>
+                </div>
+                <button onclick="simulateScenario('crowd')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs shrink-0 ml-2">
+                  Test Friction
+                </button>
+              </div>
+            </div>
+
+            <!-- Scenario B: Biometric Scanner Downtime -->
+            <div class="p-3 rounded-xl border border-slate-200 hover:border-indigo-300 bg-slate-50/60 transition">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-xs text-slate-800">Scenario B: e-PoS Biometric Scanner Failure</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">Elderly or construction worker's worn fingerprints fail 3 times at the counter.</div>
+                </div>
+                <button onclick="simulateScenario('biometric')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs shrink-0 ml-2">
+                  Test Fallback
+                </button>
+              </div>
+            </div>
+
+            <!-- Scenario C: Zero Internet at Fair Price Shop -->
+            <div class="p-3 rounded-xl border border-slate-200 hover:border-indigo-300 bg-slate-50/60 transition">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-xs text-slate-800">Scenario C: Village Cellular Blackout</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">Dealer machine and beneficiary phone both have zero internet reception.</div>
+                </div>
+                <button onclick="simulateScenario('offline')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs shrink-0 ml-2">
+                  Test Cryptographic QR
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Live Scenario Simulation Output Log -->
+          <div id="simulationOutputBox" class="mt-4 p-3 bg-slate-900 rounded-xl text-slate-200 font-mono text-xs hidden">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-1.5 mb-2">
+              <span class="text-emerald-400 font-bold" id="simTitle">Simulation Log</span>
+              <button onclick="document.getElementById('simulationOutputBox').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+            </div>
+            <div id="simLogContent" class="space-y-1 text-[11px] text-slate-300 leading-relaxed"></div>
+          </div>
+        </div>
+
+        <!-- CARD 2: DEALER e-PoS MACHINE VIEW (Interactive counterpart) -->
+        <div id="dealerTerminalCard" class="bg-slate-900 text-white rounded-2xl p-5 shadow-sm border border-slate-800">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div class="flex items-center space-x-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+              <h3 class="font-bold text-sm text-white">Govt. e-PoS Dealer Terminal #402</h3>
+            </div>
+            <span class="text-[11px] bg-slate-800 text-emerald-400 px-2 py-0.5 rounded font-mono">Sync: OK</span>
+          </div>
+
+          <div class="mt-3 space-y-3">
+            <p class="text-xs text-slate-400">
+              When Ramesh arrives at the counter, the dealer scans the digital token to instantly weigh and dispense quota without manual register delays.
+            </p>
+
+            <div class="bg-slate-950 rounded-xl p-3 border border-slate-800 font-mono text-xs space-y-2">
+              <div class="flex justify-between text-slate-400">
+                <span>ACTIVE QUEUE MODE:</span>
+                <span class="text-amber-400 font-bold">HYBRID (70% Slots / 30% Walk-ins)</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>SCANNED BENEFICIARY:</span>
+                <span class="text-white font-bold" id="dealerScannedUser">Waiting for Scan...</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>AUTHENTICATION:</span>
+                <span class="text-emerald-400 font-bold" id="dealerAuthStatus">Ready</span>
+              </div>
+            </div>
+
+            <!-- Action button for Dealer -->
+            <div class="flex space-x-2">
+              <button onclick="dealerScanAction()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2 rounded-xl text-xs transition">
+                📷 Scan Ramesh's Token #TK-482
+              </button>
+              <button onclick="dealerDispenseSuccess()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-2 rounded-xl text-xs transition">
+                ⚖️ Auto-Weigh & Dispense
+              </button>
+            </div>
+        </div>
+
+        <!-- MEMBER 3 SPOTLIGHT: Field Pilot KPI Scorecard (30-Day Metrics) -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+              <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] font-extrabold">M3</span>
+              <div>
+                <h4 class="font-bold text-slate-900 text-xs sm:text-sm">Field Pilot Validation Scorecard</h4>
+                <p class="text-[10px] text-slate-500">30-Day Pilot (20 FPS Shops / 1,000 Beneficiaries)</p>
+              </div>
+            </div>
+            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Pilot: Passed ✔</span>
+          </div>
+
+          <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+              <span class="text-[10px] text-slate-500 block">Avg. Queue Wait Time</span>
+              <div class="flex items-baseline space-x-1 mt-0.5">
+                <span class="text-sm font-extrabold text-emerald-600">12.4 mins</span>
+                <span class="text-[9px] text-slate-400 line-through">165 mins</span>
+              </div>
+              <span class="text-[9px] text-emerald-700 font-semibold block mt-0.5">✔ 92.5% reduction</span>
+            </div>
+
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+              <span class="text-[10px] text-slate-500 block">Dealer Token Adherence</span>
+              <div class="flex items-baseline space-x-1 mt-0.5">
+                <span class="text-sm font-extrabold text-emerald-600">94.2%</span>
+                <span class="text-[9px] text-slate-500">(Target &gt; 90%)</span>
+              </div>
+              <span class="text-[9px] text-emerald-700 font-semibold block mt-0.5">✔ Zero queue disputes</span>
+            </div>
+
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+              <span class="text-[10px] text-slate-500 block">Annual Wage Preserved</span>
+              <div class="flex items-baseline space-x-1 mt-0.5">
+                <span class="text-sm font-extrabold text-emerald-600">₹6,000</span>
+                <span class="text-[9px] text-slate-500">/ family / yr</span>
+              </div>
+              <span class="text-[9px] text-emerald-700 font-semibold block mt-0.5">✔ 12 work days saved</span>
+            </div>
+
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+              <span class="text-[10px] text-slate-500 block">Biometric Rejections</span>
+              <div class="flex items-baseline space-x-1 mt-0.5">
+                <span class="text-sm font-extrabold text-emerald-600">0.0%</span>
+                <span class="text-[9px] text-slate-400 line-through">28.4%</span>
+              </div>
+              <span class="text-[9px] text-emerald-700 font-semibold block mt-0.5">✔ 100% OTP/Nominee fallback</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- DESIGN THINKING ANALYSIS MODAL / DRAWER -->
+  <div id="dtModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 space-y-6">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-xl font-bold">
+            🧠
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Design Thinking Specification Matrix</h2>
+            <p class="text-xs text-slate-500">Structured mapping of the 3 fundamental prototype questions</p>
+          </div>
+        </div>
+        <button onclick="toggleDtModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <!-- 3 Question Breakdown -->
+      <div class="space-y-4 text-xs sm:text-sm">
+        
+        <!-- Pillar 1 -->
+        <div class="bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-4">
+          <div class="flex items-center space-x-2 text-emerald-800 font-bold mb-1.5">
+            <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs">1</span>
+            <span class="text-sm">User Interaction Point: Pre-Visit Smart Touchpoint</span>
+          </div>
+          <div class="text-slate-700 space-y-1.5 pl-8">
+            <p><strong>Where & When:</strong> The interaction happens <em>at the beneficiary’s home or workplace before commuting</em> to the Fair Price Shop.</p>
+            <p><strong>The Context:</strong> Beneficiaries are wage-earners. Traveling 3 km and finding the shop shut or stock dry costs a day’s livelihood (₹500). By providing a <strong>1-tap live status & reservation touchpoint</strong>, the app eliminates blind commutes.</p>
+            <div class="bg-white/80 rounded-xl p-2.5 border border-emerald-200/60 font-mono text-xs text-emerald-950">
+              Interaction Flow: Beneficiary opens App ➔ Views live grain inventory & queue wait ➔ Locks 20-min arrival window ➔ Receives offline QR token.
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-4">
+          <div class="flex items-center space-x-2 text-amber-900 font-bold mb-1.5">
+            <span class="w-6 h-6 rounded-full bg-amber-600 text-white flex items-center justify-center text-xs">2</span>
+            <span class="text-sm">Single Element Addressing User's Difficulty: Guaranteed Stock & Fast-Pass Token Card</span>
+          </div>
+          <div class="text-slate-700 space-y-1.5 pl-8">
+            <p><strong>The Core Difficulty:</strong> <em>"The Black Hole of Uncertainty & Wasted Work Hours."</em> Standing in unorganized queues for 3–4 hours, facing frequent "stock finished" or "machine not working" excuses from dealers.</p>
+            <p><strong>Why This Single Element:</strong> Rather than a bloated portal with complex menus, this <strong>single unified card</strong> directly resolves the pain point by:
+              (a) Earmarking the beneficiary’s exact entitlement in the database,
+              (b) Displaying live queue time (~12 mins),
+              (c) Generating an offline cryptographically signed token that guarantees grain allocation.</p>
+          </div>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="bg-rose-50/60 border border-rose-200/80 rounded-2xl p-4">
+          <div class="flex items-center space-x-2 text-rose-900 font-bold mb-1.5">
+            <span class="w-6 h-6 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs">3</span>
+            <span class="text-sm">What We Do Not Yet Know Will Work: Dealer Compliance & Queue Friction</span>
+          </div>
+          <div class="text-slate-700 space-y-1.5 pl-8">
+            <p><strong>The Critical Untested Assumption:</strong> <em>Will Fair Price Shop dealers respect digital reservation tokens when pressured by an aggressive, non-digital crowd waiting physically outside in the heat?</em></p>
+            <p><strong>How the Prototype Tests This:</strong></p>
+            <ul class="list-disc pl-4 space-y-1">
+              <li><strong>Hybrid Queue Allocation (70% slots / 30% walk-ins)</strong> to ensure fairness for non-smartphone users.</li>
+              <li><strong>Offline Cryptographic Verification</strong> so dealers cannot cite "internet connection down" to turn people away.</li>
+              <li><strong>Geo-Verified Inspector SOS button</strong> providing direct accountability if a dealer refuses a valid digital token.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Testing Protocol -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+          <h4 class="font-bold text-slate-800 text-sm mb-2">Validation Metrics for Field Pilot:</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div class="p-2.5 bg-white rounded-xl border border-slate-200">
+              <div class="text-slate-500 font-medium">Queue Time Reduction</div>
+              <div class="text-slate-900 font-bold text-sm mt-0.5">Target: &lt; 20 Mins</div>
+              <div class="text-slate-400 text-[10px]">Down from 180 mins</div>
+            </div>
+            <div class="p-2.5 bg-white rounded-xl border border-slate-200">
+              <div class="text-slate-500 font-medium">Dealer Token Adherence</div>
+              <div class="text-slate-900 font-bold text-sm mt-0.5">Target: &gt; 92%</div>
+              <div class="text-slate-400 text-[10px]">Zero unjustified turnaways</div>
+            </div>
+            <div class="p-2.5 bg-white rounded-xl border border-slate-200">
+              <div class="text-slate-500 font-medium">Biometric Bypass Safety</div>
+              <div class="text-slate-900 font-bold text-sm mt-0.5">Target: 100%</div>
+              <div class="text-slate-400 text-[10px]">Offline token OTP success</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="toggleDtModal()" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition">
+          Close & Back to Prototype
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3-MEMBER TEAM ROLE GUIDE MODAL -->
+  <div id="teamModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 p-5 sm:p-6 space-y-5">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
+            👥
+          </div>
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">3-Member Team Presentation Guide</h2>
+            <p class="text-xs text-slate-500">How to divide and present this Design Thinking project seamlessly</p>
+          </div>
+        </div>
+        <button onclick="toggleTeamModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">✕</button>
+      </div>
+
+      <!-- Tab Buttons for Member 1, 2, and 3 -->
+      <div class="grid grid-cols-3 gap-2 bg-slate-100 p-1.5 rounded-2xl text-xs font-bold">
+        <button id="tabBtnM1" onclick="switchTeamTab('m1')" class="py-2 px-3 rounded-xl bg-white text-indigo-900 shadow-xs transition text-center">
+          👤 Member 1: Interaction Point
+        </button>
+        <button id="tabBtnM2" onclick="switchTeamTab('m2')" class="py-2 px-3 rounded-xl text-slate-600 hover:text-slate-900 transition text-center">
+          ⭐ Member 2: The Single Element
+        </button>
+        <button id="tabBtnM3" onclick="switchTeamTab('m3')" class="py-2 px-3 rounded-xl text-slate-600 hover:text-slate-900 transition text-center">
+          🧪 Member 3: The Critical Unknown
+        </button>
+      </div>
+
+      <!-- TAB 1: MEMBER 1 CONTENT -->
+      <div id="tabContentM1" class="space-y-4 text-xs sm:text-sm">
+        <div class="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-indigo-950 text-sm">Member 1: Empathy, Persona & The User Interaction Point</span>
+            <span class="bg-indigo-200/80 text-indigo-900 text-[10px] font-bold px-2 py-0.5 rounded-md">Pillar 1</span>
+          </div>
+          <p class="text-slate-700 text-xs leading-relaxed mb-3">
+            <strong>Your Goal:</strong> Hook the teacher with the human story of <strong>Ramesh</strong> and explain <em>why moving the interaction point to 7:30 AM before commuting</em> saves his livelihood.
+          </p>
+          <div class="bg-white rounded-xl p-3 border border-indigo-100 space-y-2 text-xs">
+            <div class="font-bold text-slate-800">🗣️ What You Say to the Teacher:</div>
+            <p class="italic text-slate-600">
+              "Good morning, Teacher. I am introducing our beneficiary, Ramesh Kumar, a daily-wage laborer earning ₹500/day. In the traditional system, Ramesh interacts with the PDS only AFTER walking 3 km to the shop. If the shop is shut or stock is out, he loses his entire day's wages."
+            </p>
+            <p class="italic text-slate-600">
+              "We solved this by creating a <strong>Pre-Commute Smart Touchpoint</strong>. Before leaving home at 7:30 AM, Ramesh opens the app to see live shop status, wait time, and available grain balance."
+            </p>
+          </div>
+          <div class="mt-3 p-2.5 bg-indigo-100/60 rounded-xl text-indigo-950 font-semibold text-xs flex items-center space-x-2">
+            <span>👉</span>
+            <span><strong>Your Live Demo Action:</strong> Click the <span class="bg-white px-1.5 py-0.5 rounded text-indigo-900 font-bold">"Old PDS vs RationSetu"</span> toggle on the phone screen to show how wait time drops from 180 to 12 minutes and saves ₹500!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: MEMBER 2 CONTENT -->
+      <div id="tabContentM2" class="space-y-4 text-xs sm:text-sm hidden">
+        <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-emerald-950 text-sm">Member 2: The Single Element (Guaranteed Stock Card & UX)</span>
+            <span class="bg-emerald-200/80 text-emerald-900 text-[10px] font-bold px-2 py-0.5 rounded-md">Pillar 2</span>
+          </div>
+          <p class="text-slate-700 text-xs leading-relaxed mb-3">
+            <strong>Your Goal:</strong> Explain why a <strong>single unified card</strong> is better than 20 complex menus for low-digital-literacy citizens, and demonstrate the 24-hr stock lock.
+          </p>
+          <div class="bg-white rounded-xl p-3 border border-emerald-100 space-y-2 text-xs">
+            <div class="font-bold text-slate-800">🗣️ What You Say to the Teacher:</div>
+            <p class="italic text-slate-600">
+              "To answer the teacher's question on 'Which single element solves the difficulty?', we built the <strong>Guaranteed Stock & Fast-Pass Token Card</strong>. Instead of deep menus, this single hero card collapses 4 critical needs: live stock meters (20kg Rice, 10kg Wheat), crowd wait time, 24-hour stock lock, and an offline verifiable QR token."
+            </p>
+            <p class="italic text-slate-600">
+              "We also added <strong>Family Nominee Delegation</strong>. If Ramesh is working overtime, his spouse Sunita Devi or son Amit can collect the ration with their linked Aadhaar!"
+            </p>
+          </div>
+          <div class="mt-3 p-2.5 bg-emerald-100/60 rounded-xl text-emerald-950 font-semibold text-xs flex items-center space-x-2">
+            <span>👉</span>
+            <span><strong>Your Live Demo Action:</strong> Select <span class="bg-white px-1.5 py-0.5 rounded text-emerald-900 font-bold">"Sunita Devi (Spouse)"</span> in the nominee dropdown, pick slot 4:00 PM, and click <span class="bg-emerald-600 text-white px-1.5 py-0.5 rounded font-bold">"Lock My Quota"</span> to generate the offline token pass!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: MEMBER 3 CONTENT -->
+      <div id="tabContentM3" class="space-y-4 text-xs sm:text-sm hidden">
+        <div class="bg-rose-50/70 border border-rose-200 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-rose-950 text-sm">Member 3: What We Do Not Yet Know Will Work & Pilot Validation</span>
+            <span class="bg-rose-200/80 text-rose-900 text-[10px] font-bold px-2 py-0.5 rounded-md">Pillar 3</span>
+          </div>
+          <p class="text-slate-700 text-xs leading-relaxed mb-3">
+            <strong>Your Goal:</strong> Address the critical unknown: <em>"Will dealers honor digital appointments when 50 angry walk-in laborers are protesting outside?"</em> and present the Pilot Scorecard.
+          </p>
+          <div class="bg-white rounded-xl p-3 border border-rose-100 space-y-2 text-xs">
+            <div class="font-bold text-slate-800">🗣️ What You Say to the Teacher:</div>
+            <p class="italic text-slate-600">
+              "In Design Thinking, we must test the riskiest assumption. Our biggest unknown was dealer compliance under walk-in crowd pressure. What if walk-ins shout at token holders? We introduced the <strong>70/30 Hybrid Dynamic Queue</strong> (1 token served per 2 walk-ins) and an outdoor <strong>Public Queue Display Board</strong> so the crowd sees reservations are transparent and open to everyone."
+            </p>
+            <p class="italic text-slate-600">
+              "We also solved biometric optical failures (common for construction workers with worn fingerprints) through multi-tier OTP/Iris fallback, and tested offline ECDSA verification during network blackouts."
+            </p>
+          </div>
+          <div class="mt-3 p-2.5 bg-rose-100/60 rounded-xl text-rose-950 font-semibold text-xs flex items-center space-x-2">
+            <span>👉</span>
+            <span><strong>Your Live Demo Action:</strong> Click <span class="bg-indigo-600 text-white px-1.5 py-0.5 rounded font-bold">"Test Friction"</span> on the testing panel, show the <strong>Field Pilot Scorecard</strong> (92.5% wait reduction, ₹6,000 saved/yr), and click <span class="bg-emerald-600 text-slate-950 px-1.5 py-0.5 rounded font-bold">"Scan Ramesh's Token"</span> on the Dealer e-PoS!</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center pt-2 border-t border-slate-100 text-xs text-slate-500">
+        <span>💡 Each member gets 1.5 to 2 minutes for a crisp, 5-minute team presentation.</span>
+        <button onclick="toggleTeamModal()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition">
+          Close Guide
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FULL SCREEN MAP & DIRECTIONS MODAL -->
+  <div id="mapModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 p-5 sm:p-6 space-y-5">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl font-bold">
+            🗺️
+          </div>
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">Fair Price Shop (FPS) Geo-Locator</h2>
+            <p class="text-xs text-slate-500">Live GPS routing, crowd heatmaps & ONORC portable shop discovery</p>
+          </div>
+        </div>
+        <button onclick="toggleMapModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">✕</button>
+      </div>
+
+      <!-- Live GPS Banner -->
+      <div class="bg-slate-900 text-white rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center space-x-2.5">
+          <span class="w-3 h-3 rounded-full bg-blue-500 animate-ping"></span>
+          <div>
+            <div class="font-bold text-slate-200">Current GPS Fix: Worksite (Ward 12 Chowk)</div>
+            <div class="text-[11px] text-slate-400 font-mono">12.9716° N, 77.5946° E • Accuracy ±4m</div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full text-[11px] font-semibold">
+            2 FPS Shops within 1.5 km
+          </span>
+        </div>
+      </div>
+
+      <!-- Large Interactive Vector Map -->
+      <div class="relative w-full h-64 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 shadow-inner select-none">
+        <svg class="w-full h-full" viewBox="0 0 600 260" xmlns="http://www.w3.org/2000/svg">
+          <!-- Terrain & Blocks -->
+          <rect width="600" height="260" fill="#f8fafc"/>
+          
+          <!-- Neighborhood Polygons -->
+          <rect x="20" y="20" width="130" height="85" rx="10" fill="#dcfce7" opacity="0.6"/>
+          <text x="35" y="55" font-size="11" fill="#15803d" font-weight="bold">Gandhi Nagar Park</text>
+
+          <rect x="420" y="140" width="150" height="95" rx="10" fill="#ede9fe" opacity="0.7"/>
+          <text x="440" y="180" font-size="11" fill="#6d28d9" font-weight="bold">Metro Depot Station</text>
+          <text x="440" y="196" font-size="9" fill="#7c3aed">ONORC Hub Zone</text>
+
+          <rect x="230" y="25" width="140" height="75" rx="10" fill="#fef3c7" opacity="0.5"/>
+          <text x="245" y="55" font-size="11" fill="#b45309" font-weight="bold">Ward 12 Market</text>
+
+          <!-- Main Avenues & Roads -->
+          <path d="M 0 130 Q 300 120 600 130" stroke="#cbd5e1" stroke-width="22" fill="none" stroke-linecap="round"/>
+          <path d="M 0 130 Q 300 120 600 130" stroke="#ffffff" stroke-width="16" fill="none" stroke-linecap="round"/>
+
+          <path d="M 180 0 L 180 260" stroke="#cbd5e1" stroke-width="18" fill="none"/>
+          <path d="M 180 0 L 180 260" stroke="#ffffff" stroke-width="12" fill="none"/>
+
+          <path d="M 390 0 L 390 260" stroke="#cbd5e1" stroke-width="16" fill="none"/>
+          <path d="M 390 0 L 390 260" stroke="#ffffff" stroke-width="10" fill="none"/>
+
+          <!-- Dynamic Active Route Polyline -->
+          <path id="svgModalRoute" d="M 90 200 L 180 200 L 180 130 L 340 130 L 340 70" stroke="#059669" stroke-width="4.5" stroke-dasharray="7,5" fill="none"/>
+
+          <!-- Marker 1: Ramesh Current Location -->
+          <g transform="translate(90, 200)" class="cursor-pointer">
+            <circle r="18" fill="#3b82f6" opacity="0.25" class="animate-ping"/>
+            <circle r="9" fill="#2563eb" stroke="#ffffff" stroke-width="3"/>
+            <rect x="-45" y="14" width="90" height="20" rx="5" fill="#1e293b" opacity="0.95"/>
+            <text x="0" y="28" font-size="9" fill="#ffffff" font-weight="bold" text-anchor="middle">📍 You (Worksite)</text>
+          </g>
+
+          <!-- Marker 2: Primary Shop #402 -->
+          <g id="modalPin402" transform="translate(340, 70)" class="cursor-pointer" onclick="selectShopLocation('402')">
+            <circle r="22" fill="#10b981" opacity="0.3"/>
+            <path d="M 0 -20 C -10 -20 -14 -10 0 8 C 14 -10 10 -20 0 -20 Z" fill="#059669" stroke="#ffffff" stroke-width="2"/>
+            <circle cx="0" cy="-8" r="5" fill="#ffffff"/>
+            <rect x="-65" y="-45" width="130" height="22" rx="6" fill="#064e3b" opacity="0.95"/>
+            <text x="0" y="-30" font-size="9.5" fill="#ffffff" font-weight="bold" text-anchor="middle">🌾 Sharma FPS #402 (Assigned)</text>
+          </g>
+
+          <!-- Marker 3: Alternate Portable Shop #108 -->
+          <g id="modalPin108" transform="translate(490, 140)" class="cursor-pointer" onclick="selectShopLocation('108')">
+            <circle r="18" fill="#8b5cf6" opacity="0.25"/>
+            <path d="M 0 -17 C -8 -17 -11 -8 0 7 C 11 -8 8 -17 0 -17 Z" fill="#7c3aed" stroke="#ffffff" stroke-width="1.8"/>
+            <circle cx="0" cy="-7" r="4" fill="#ffffff"/>
+            <rect x="-55" y="-40" width="110" height="20" rx="5" fill="#4c1d95" opacity="0.95"/>
+            <text x="0" y="-26" font-size="9" fill="#ffffff" font-weight="bold" text-anchor="middle">🏬 Metro FPS #108 (ONORC)</text>
+          </g>
+        </svg>
+
+        <!-- Floating Route Quick Info Card -->
+        <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm p-2.5 rounded-xl border border-slate-200 shadow-md text-xs space-y-1">
+          <div class="font-extrabold text-slate-900 flex items-center space-x-1">
+            <span>🚶</span>
+            <span id="modalRouteSummary">Route to Sharma FPS #402</span>
+          </div>
+          <div class="text-[11px] text-emerald-700 font-bold" id="modalRouteMetrics">1.2 km • ~14 mins on foot (5 mins by cycle)</div>
+          <div class="text-[10px] text-slate-500">Live Queue: 8 people • Stock: 100% Ready</div>
+        </div>
+      </div>
+
+      <!-- Turn-by-Turn Navigation Steps & Shop Switcher -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+        
+        <!-- Column A: Walking Steps -->
+        <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 space-y-2">
+          <div class="font-bold text-slate-800 text-xs flex items-center justify-between">
+            <span>Turn-by-Turn Directions</span>
+            <span class="text-[10px] text-slate-400">Flat terrain</span>
+          </div>
+          <div class="space-y-1.5 text-[11px] text-slate-600">
+            <div class="flex items-start space-x-2">
+              <span class="w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-[9px] shrink-0 mt-0.5">1</span>
+              <span>Head north from Worksite towards Gandhi Chowk (200m).</span>
+            </div>
+            <div class="flex items-start space-x-2">
+              <span class="w-4 h-4 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-[9px] shrink-0 mt-0.5">2</span>
+              <span>Turn right at Ward 12 Main Road (proceed 850m).</span>
+            </div>
+            <div class="flex items-start space-x-2">
+              <span class="w-4 h-4 rounded-full bg-emerald-200 text-emerald-800 font-bold flex items-center justify-center text-[9px] shrink-0 mt-0.5">3</span>
+              <span>Arrive at <strong>Sharma Fair Price Shop #402</strong> (Green shutter next to Post Office).</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column B: Selectable Nearby FPS Shops -->
+        <div class="space-y-2">
+          <div class="font-bold text-slate-800 text-xs">Select Fair Price Shop:</div>
+
+          <div id="cardShop402" onclick="selectShopLocation('402')" class="p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50/70 cursor-pointer transition hover:shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-emerald-950 text-xs">Shop #402 - S. Sharma (Assigned)</span>
+              <span class="text-[9px] bg-emerald-200 text-emerald-900 font-bold px-2 py-0.5 rounded-full">Selected</span>
+            </div>
+            <div class="text-[11px] text-emerald-800 mt-1">1.2 km away • 14 min walk • 🟢 Wait: ~12 mins</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Stock: 20kg Rice, 10kg Wheat fully reserved</div>
+          </div>
+
+          <div id="cardShop108" onclick="selectShopLocation('108')" class="p-3 rounded-2xl border border-slate-200 bg-white hover:border-purple-300 cursor-pointer transition hover:shadow-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800 text-xs">Shop #108 - Metro Depot (ONORC)</span>
+              <span class="text-[9px] bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-full">Saves 8 mins</span>
+            </div>
+            <div class="text-[11px] text-purple-700 mt-1">600m away • 7 min walk • 🟢 Wait: ~4 mins</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">One Nation One Ration Card portable quota supported</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+        <button onclick="simulateLiveNavigation()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-xs transition flex items-center space-x-1.5">
+          <span>🧭</span>
+          <span>Start Walking Guidance</span>
+        </button>
+        <button onclick="toggleMapModal()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition">
+          Close Map
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- OFFLINE SMS BOOKING MODAL (Zero Internet / Feature Phone) -->
+  <div id="smsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-white rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 p-5 sm:p-6 space-y-4">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-800 flex items-center justify-center text-xl font-bold">
+            📲
+          </div>
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">Offline SMS Slot Reservation</h2>
+            <p class="text-xs text-slate-500">For basic keypad phones & areas with zero mobile data</p>
+          </div>
+        </div>
+        <button onclick="toggleSmsModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">✕</button>
+      </div>
+
+      <!-- Feature highlight banner -->
+      <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-3 text-xs text-indigo-900 space-y-1">
+        <div class="font-bold flex items-center space-x-1">
+          <span>💡</span>
+          <span>Universal NFSA Accessibility Protocol:</span>
+        </div>
+        <p class="text-[11px] text-slate-600">
+          Any family member can send a standard SMS from any ₹1,000 keypad phone to lock monthly grains and receive a digital queue token without needing an internet connection.
+        </p>
+      </div>
+
+      <!-- SMS Template Card -->
+      <div class="bg-slate-900 text-white rounded-2xl p-4 space-y-3 font-mono text-xs">
+        <div class="flex justify-between items-center text-slate-400 text-[11px] border-b border-slate-800 pb-2">
+          <span>SEND SMS TO:</span>
+          <span class="text-emerald-400 font-bold text-sm">56070 <span class="text-[10px] text-slate-400 font-normal">(or 1967)</span></span>
+        </div>
+
+        <div class="space-y-1">
+          <span class="text-[10px] text-slate-400 uppercase">Pre-Formatted Message:</span>
+          <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-emerald-300 font-bold text-xs select-all">
+            RATION 072094812094 BOOK 402 4PM
+          </div>
+          <div class="text-[10px] text-slate-400">Syntax: RATION &lt;RationCardNo&gt; BOOK &lt;ShopNo&gt; &lt;TimeSlot&gt;</div>
+        </div>
+
+        <!-- Simulation Demo Button -->
+        <button onclick="simulateSmsConfirmation()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl text-xs transition flex items-center justify-center space-x-2">
+          <span>📤</span>
+          <span>Simulate Sending SMS from Mobile</span>
+        </button>
+      </div>
+
+      <!-- SMS Confirmation Received Preview Box -->
+      <div id="smsReplyCard" class="hidden p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs space-y-1.5 transition">
+        <div class="flex items-center justify-between text-emerald-900 font-bold">
+          <span class="flex items-center space-x-1">
+            <span>💬</span>
+            <span>Incoming SMS from GOV-PDS:</span>
+          </span>
+          <span class="text-[10px] text-slate-500 font-normal">Just now</span>
+        </div>
+        <p class="font-mono text-[11px] text-slate-800 bg-white p-2.5 rounded-xl border border-emerald-200">
+          "Govt of India (NFSA): Token #TK-482 confirmed for Ramesh Kumar. 30kg grains locked at Shop #402 for Today 4:15 PM. Valid for 24 hrs. Show this SMS at counter. Helpline: 1967"
+        </p>
+        <span class="text-[10px] text-emerald-700 font-semibold block">✔ Quota locked in state database without internet!</span>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+        <a href="sms:56070?body=RATION%20072094812094%20BOOK%20402%204PM" class="text-xs font-bold text-indigo-600 hover:underline">
+          Open Native Messaging App ↗
+        </a>
+        <button onclick="toggleSmsModal()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition">
+          Close SMS Tool
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 24x7 HELPLINE & GRIEVANCE MODAL -->
+  <div id="helplineModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-white rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 p-5 sm:p-6 space-y-4">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-800 flex items-center justify-center text-xl font-bold">
+            📞
+          </div>
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">National PDS Support & Helpline</h2>
+            <p class="text-xs text-slate-500">Official government toll-free numbers, email IDs & escalation contacts</p>
+          </div>
+        </div>
+        <button onclick="toggleHelplineModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">✕</button>
+      </div>
+
+      <!-- Toll-Free Phone Numbers -->
+      <div class="space-y-2 text-xs">
+        <div class="font-bold text-slate-800 text-xs">Government Toll-Free Helplines (24x7):</div>
+        
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-slate-900 text-xs">National Food Security Toll-Free</div>
+            <div class="text-[11px] text-slate-500">All-India toll-free number for ration card holders</div>
+          </div>
+          <a href="tel:1967" onclick="alert('Calling National PDS Helpline: 1967 (Toll-Free)')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition">
+            📞 1967
+          </a>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-slate-900 text-xs">State Food & Civil Supplies Helpdesk</div>
+            <div class="text-[11px] text-slate-500">Quota distribution & dealer complaints</div>
+          </div>
+          <a href="tel:18001802087" onclick="alert('Calling State PDS Helpdesk: 1800-180-2087 (Toll-Free)')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition">
+            📞 1800-180-2087
+          </a>
+        </div>
+      </div>
+
+      <!-- Official Email IDs -->
+      <div class="space-y-2 text-xs">
+        <div class="font-bold text-slate-800 text-xs">Official Support & Grievance Emails:</div>
+
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-slate-900 text-xs">Central PDS Grievance Cell</div>
+            <div class="text-[11px] font-mono text-emerald-700 font-bold">grievance.pds@nic.in</div>
+          </div>
+          <a href="mailto:grievance.pds@nic.in" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition">
+            ✉️ Email NIC
+          </a>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
+          <div>
+            <div class="font-bold text-slate-900 text-xs">RationSetu Technical Helpdesk</div>
+            <div class="text-[11px] font-mono text-indigo-700 font-bold">support.rationsetu@gov.in</div>
+          </div>
+          <a href="mailto:support.rationsetu@gov.in" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs transition">
+            ✉️ Email Support
+          </a>
+        </div>
+      </div>
+
+      <!-- Local Inspector Contact -->
+      <div class="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-950 flex items-center justify-between">
+        <div>
+          <div class="font-bold text-xs">District Food Supply Officer (DFSO):</div>
+          <div class="text-[11px] text-slate-700">Inspector V. Verma (Indiranagar / Ward 12 Zone)</div>
+        </div>
+        <a href="tel:+919412048210" onclick="alert('Calling DFSO Inspector V. Verma: +91 94120 48210')" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs transition">
+          📞 +91 94120 48210
+        </a>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex justify-end pt-2 border-t border-slate-100">
+        <button onclick="toggleHelplineModal()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition">
+          Close Contacts
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // State Management
+    let currentLang = 'hi';
+    let isOffline = false;
+    let hasBookedToken = false;
+    let selectedSlot = 'today_4pm';
+    let currentCollector = 'Ramesh Kumar (Self - Head)';
+
+    // Team Modal Toggling
+    function toggleTeamModal() {
+      const m = document.getElementById('teamModal');
+      m.classList.toggle('hidden');
+    }
+
+    function switchTeamTab(tab) {
+      document.getElementById('tabContentM1').classList.toggle('hidden', tab !== 'm1');
+      document.getElementById('tabContentM2').classList.toggle('hidden', tab !== 'm2');
+      document.getElementById('tabContentM3').classList.toggle('hidden', tab !== 'm3');
+
+      const b1 = document.getElementById('tabBtnM1');
+      const b2 = document.getElementById('tabBtnM2');
+      const b3 = document.getElementById('tabBtnM3');
+
+      const activeCls = "py-2 px-3 rounded-xl bg-white text-indigo-900 shadow-xs transition text-center";
+      const inactiveCls = "py-2 px-3 rounded-xl text-slate-600 hover:text-slate-900 transition text-center";
+
+      b1.className = tab === 'm1' ? activeCls : inactiveCls;
+      b2.className = tab === 'm2' ? activeCls : inactiveCls;
+      b3.className = tab === 'm3' ? activeCls : inactiveCls;
+    }
+
+    // Member 1 Journey Impact Switcher
+    function toggleJourneyImpact(type) {
+      const bOld = document.getElementById('btnOldPds');
+      const bNew = document.getElementById('btnNewPds');
+      const tTime = document.getElementById('impactTime');
+      const tWage = document.getElementById('impactWage');
+      const tStock = document.getElementById('impactStock');
+
+      if (type === 'old') {
+        bOld.className = "px-2 py-0.5 rounded-md bg-rose-600 text-white shadow-xs transition";
+        bNew.className = "px-2 py-0.5 rounded-md text-indigo-900 transition";
+        tTime.innerText = "180 mins";
+        tTime.className = "font-extrabold text-rose-600 text-xs";
+        tWage.innerText = "₹500 Lost";
+        tWage.className = "font-extrabold text-rose-600 text-xs";
+        tStock.innerText = "0% Guarantee";
+        tStock.className = "font-extrabold text-rose-600 text-xs";
+      } else {
+        bNew.className = "px-2 py-0.5 rounded-md bg-indigo-700 text-white shadow-xs transition";
+        bOld.className = "px-2 py-0.5 rounded-md text-indigo-900 transition";
+        tTime.innerText = "12 mins";
+        tTime.className = "font-extrabold text-emerald-700 text-xs";
+        tWage.innerText = "₹500 Saved";
+        tWage.className = "font-extrabold text-emerald-700 text-xs";
+        tStock.innerText = "100% Locked";
+        tStock.className = "font-extrabold text-emerald-700 text-xs";
+      }
+    }
+
+    // Member 2 Nominee Collector Updater
+    function updateCollector(name) {
+      currentCollector = name;
+      const scannedEl = document.getElementById('dealerScannedUser');
+      if (hasBookedToken) {
+        scannedEl.innerText = `${name} (TK-482)`;
+      }
+    }
+
+    // Map Modal & Location Handlers
+    let currentShopId = '402';
+
+    function toggleMapModal() {
+      const m = document.getElementById('mapModal');
+      m.classList.toggle('hidden');
+    }
+
+    function toggleSmsModal() {
+      const m = document.getElementById('smsModal');
+      m.classList.toggle('hidden');
+    }
+
+    function simulateSmsConfirmation() {
+      const reply = document.getElementById('smsReplyCard');
+      reply.classList.remove('hidden');
+      hasBookedToken = true;
+      document.getElementById('unbookedSlotSection').classList.add('hidden');
+      document.getElementById('bookedTokenSection').classList.remove('hidden');
+      document.getElementById('dealerScannedUser').innerText = `${currentCollector} (TK-482 - SMS Locked)`;
+      document.getElementById('dealerAuthStatus').innerText = "SMS Token Valid (Slot 4:00 PM)";
+      alert("📲 SMS SENT TO 56070!\nIncoming Govt SMS received: Token #TK-482 generated & 30kg quota locked at Shop #402. Valid for 24 hours.");
+    }
+
+    function toggleHelplineModal() {
+      const m = document.getElementById('helplineModal');
+      m.classList.toggle('hidden');
+    }
+
+    function selectShopLocation(shopId) {
+      currentShopId = shopId;
+      const badge = document.getElementById('mapRouteBadge');
+      const activeLabel = document.getElementById('mapActiveShopLabel');
+      const locHeader = document.getElementById('txtShopLocation');
+      const dealerName = document.getElementById('txtDealerName');
+      const waitVal = document.getElementById('txtWaitTimeVal');
+      const queueVal = document.getElementById('txtQueueCount');
+      
+      const b402 = document.getElementById('btnSelectShop402');
+      const b108 = document.getElementById('btnSelectShop108');
+      const b330 = document.getElementById('btnSelectShop330');
+      const b215 = document.getElementById('btnSelectShop215');
+      const b512 = document.getElementById('btnSelectShop512');
+
+      const modalSummary = document.getElementById('modalRouteSummary');
+      const modalMetrics = document.getElementById('modalRouteMetrics');
+
+      const defaultBtnCls = "p-2 rounded-xl border border-slate-200 bg-white hover:border-slate-300 text-left transition";
+      if (b402) b402.className = defaultBtnCls;
+      if (b108) b108.className = defaultBtnCls;
+      if (b330) b330.className = defaultBtnCls;
+      if (b215) b215.className = defaultBtnCls;
+      if (b512) b512.className = "w-full p-1.5 rounded-xl border border-slate-200 bg-white hover:border-slate-300 text-left transition flex items-center justify-between";
+
+      if (shopId === '402') {
+        if (badge) badge.innerText = "1.2 km • 14 min walk";
+        if (activeLabel) activeLabel.innerText = "Assigned: Sharma FPS #402 (1.2 km)";
+        if (locHeader) locHeader.innerText = "Shop #402 - Ward 12";
+        if (dealerName) dealerName.innerText = "Dealer: S. Sharma";
+        if (waitVal) waitVal.innerText = "~12 Mins";
+        if (queueVal) queueVal.innerText = "8 people in queue";
+        if (b402) b402.className = "p-2 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-left transition";
+        if (modalSummary) modalSummary.innerText = "Route to Sharma FPS #402";
+        if (modalMetrics) modalMetrics.innerText = "1.2 km • ~14 mins on foot (5 mins by cycle)";
+      } else if (shopId === '108') {
+        if (badge) badge.innerText = "600m • 7 min walk";
+        if (activeLabel) activeLabel.innerText = "ONORC: Metro FPS #108 (600m)";
+        if (locHeader) locHeader.innerText = "Shop #108 - Metro Depot";
+        if (dealerName) dealerName.innerText = "Dealer: K. Verma (Metro)";
+        if (waitVal) waitVal.innerText = "~4 Mins";
+        if (queueVal) queueVal.innerText = "3 people in queue";
+        if (b108) b108.className = "p-2 rounded-xl border-2 border-purple-500 bg-purple-50 text-left transition";
+        if (modalSummary) modalSummary.innerText = "Route to Metro Depot FPS #108 (Fastest)";
+        if (modalMetrics) modalMetrics.innerText = "600m • ~7 mins on foot (saves 8 mins!)";
+      } else if (shopId === '330') {
+        if (badge) badge.innerText = "850m • 10 min walk";
+        if (activeLabel) activeLabel.innerText = "SHG: Mahila Samiti #330 (850m)";
+        if (locHeader) locHeader.innerText = "Shop #330 - Indira Colony";
+        if (dealerName) dealerName.innerText = "Dealer: Anita Devi (SHG)";
+        if (waitVal) waitVal.innerText = "~8 Mins";
+        if (queueVal) queueVal.innerText = "5 people in queue";
+        if (b330) b330.className = "p-2 rounded-xl border-2 border-teal-500 bg-teal-50 text-left transition";
+        if (modalSummary) modalSummary.innerText = "Route to Mahila Samiti FPS #330";
+        if (modalMetrics) modalMetrics.innerText = "850m • ~10 mins on foot (Women-run SHG)";
+      } else if (shopId === '215') {
+        if (badge) badge.innerText = "1.7 km • 20 min walk";
+        if (activeLabel) activeLabel.innerText = "Hospital: Jan Aahar #215 (1.7 km)";
+        if (locHeader) locHeader.innerText = "Shop #215 - Civil Hospital";
+        if (dealerName) dealerName.innerText = "Dealer: R. Mishra";
+        if (waitVal) waitVal.innerText = "~18 Mins";
+        if (queueVal) queueVal.innerText = "14 people in queue";
+        if (b215) b215.className = "p-2 rounded-xl border-2 border-amber-500 bg-amber-50 text-left transition";
+        if (modalSummary) modalSummary.innerText = "Route to Jan Aahar Kendra #215";
+        if (modalMetrics) modalMetrics.innerText = "1.7 km • ~20 mins on foot";
+      } else if (shopId === '512') {
+        if (badge) badge.innerText = "2.3 km • 28 min walk";
+        if (activeLabel) activeLabel.innerText = "Crowded: Mandi FPS #512 (2.3 km)";
+        if (locHeader) locHeader.innerText = "Shop #512 - Railway Mandi";
+        if (dealerName) dealerName.innerText = "Dealer: P. Gupta";
+        if (waitVal) waitVal.innerText = "~35 Mins";
+        if (queueVal) queueVal.innerText = "24 people in queue (High wait)";
+        if (b512) b512.className = "w-full p-1.5 rounded-xl border-2 border-rose-500 bg-rose-50 text-left transition flex items-center justify-between";
+        if (modalSummary) modalSummary.innerText = "Route to Old Railway Mandi FPS #512";
+        if (modalMetrics) modalMetrics.innerText = "2.3 km • ~28 mins on foot • High crowd";
+      }
+    }
+
+    function simulateLiveNavigation() {
+      alert("🧭 LIVE GPS GUIDANCE ACTIVATED:\nRouting to Fair Price Shop: " + (currentShopId === '402' ? "Sharma FPS (1.2 km)" : currentShopId === '108' ? "Metro FPS (600m)" : currentShopId === '330' ? "Mahila Samiti (850m)" : "FPS Location") + "\nTurn right at Ward 12 Main Road in 200m.");
+    }
+
+    // Translations Dictionary
+    const i18n = {
+      en: {
+        pdsOnline: "NFSA Verified",
+        cardType: "Antyodaya Anna Yojana (AAY)",
+        userName: "Ramesh Kumar",
+        family: "Family",
+        cardTitle: "Live Shop & Stock Status",
+        shopStatus: "🟢 OPEN (Till 7 PM)",
+        waitTimeLabel: "Current Wait Time",
+        waitTimeVal: "~12 Mins",
+        queueCount: "8 people in queue",
+        grainLabel: "Grain Availability",
+        stockVal: "100% In Stock",
+        dealerName: "Dealer: S. Sharma",
+        entitleLabel: "October 2026 Quota Balance",
+        quotaTotal: "30 kg Remaining",
+        itemRice: "Rice",
+        itemWheat: "Wheat",
+        itemSugar: "Sugar",
+        slotLabel: "Select Fast-Track Pickup Slot:",
+        slot1Title: "Today, 4:00 - 4:30 PM",
+        slot1Fast: "⚡ 4 slots remaining",
+        slot2Title: "Today, 5:30 - 6:00 PM",
+        slot2Fast: "11 slots available",
+        bookBtn: "Lock My Quota & Get Fast-Pass Token",
+        tokenNote: "Locks your stock for 24 hours. No line waiting.",
+        confirmedTime: "Today @ 4:15 PM",
+        quotaLocked: "30 kg Grains Reserved for 24 Hrs",
+        saveToken: "Save Token Pass",
+        nearbyShops: "One Nation One Ration Card (ONORC)",
+        onorcDesc: "Migrant worker? You can collect your grains at any authorized FPS shop nearby.",
+        helpHead: "Dealer Denied Stock?",
+        helpSub: "1-Tap Food Inspector Geo-Alert (Toll-Free 1967)",
+        home: "Home",
+        navMap: "Map",
+        tokenNav: "My Token",
+        history: "Passbook",
+        familyNav: "Family"
+      },
+      hi: {
+        pdsOnline: "NFSA सत्यापित",
+        cardType: "अंत्योदय अन्न योजना (AAY)",
+        userName: "रमेश कुमार",
+        family: "सदस्य",
+        cardTitle: "दुकान और राशन की स्थिति",
+        shopStatus: "🟢 खुली है (शाम 7 बजे तक)",
+        waitTimeLabel: "अनुमानित प्रतीक्षा समय",
+        waitTimeVal: "~12 मिनट",
+        queueCount: "कतार में केवल 8 लोग",
+        grainLabel: "राशन स्टॉक उपलब्धता",
+        stockVal: "100% राशन उपलब्ध",
+        dealerName: "डीलर: एस. शर्मा",
+        entitleLabel: "अक्टूबर 2026 कोटा शेष",
+        quotaTotal: "30 किलो शेष",
+        itemRice: "चावल (Rice)",
+        itemWheat: "गेहूं (Wheat)",
+        itemSugar: "चीनी (Sugar)",
+        slotLabel: "अपनी सुविधा अनुसार समय (स्लॉट) चुनें:",
+        slot1Title: "आज, शाम 4:00 - 4:30",
+        slot1Fast: "⚡ केवल 4 स्लॉट बचे हैं",
+        slot2Title: "आज, शाम 5:30 - 6:00",
+        slot2Fast: "11 स्लॉट खाली हैं",
+        bookBtn: "राशन गारंटी टोकन प्राप्त करें",
+        tokenNote: "आपका 30 किलो राशन 24 घंटे के लिए आरक्षित रहेगा।",
+        confirmedTime: "आज शाम 4:15 बजे का समय",
+        quotaLocked: "30 किलो राशन 24 घंटे के लिए लॉक",
+        saveToken: "ऑफलाइन पास सुरक्षित करें",
+        nearbyShops: "वन नेशन वन राशन कार्ड (ONORC)",
+        onorcDesc: "प्रवासी मजदूर? आप किसी भी नजदीकी सरकारी राशन दुकान से कोटा ले सकते हैं।",
+        helpHead: "डीलर ने राशन देने से मना किया?",
+        helpSub: "खाद्य निरीक्षक को तुरंत सूचित करें (टोल-फ्री 1967)",
+        home: "होम",
+        navMap: "नक्शा",
+        tokenNav: "टोकन",
+        history: "पासबुक",
+        familyNav: "परिवार"
+      }
+    };
+
+    function updateLanguageUI() {
+      const d = i18n[currentLang];
+      document.getElementById('txtPdsOnline').innerText = d.pdsOnline;
+      document.getElementById('txtCardType').innerText = d.cardType;
+      document.getElementById('txtUserName').innerText = d.userName;
+      document.getElementById('txtFamilyMembers').innerText = d.family;
+      document.getElementById('txtCardTitle').innerText = d.cardTitle;
+      document.getElementById('txtShopStatusBadge').innerText = d.shopStatus;
+      document.getElementById('txtWaitTimeLabel').innerText = d.waitTimeLabel;
+      document.getElementById('txtWaitTimeVal').innerText = d.waitTimeVal;
+      document.getElementById('txtQueueCount').innerText = d.queueCount;
+      document.getElementById('txtGrainStatusLabel').innerText = d.grainLabel;
+      document.getElementById('txtStockStatusVal').innerText = d.stockVal;
+      document.getElementById('txtDealerName').innerText = d.dealerName;
+      document.getElementById('txtEntitlementLabel').innerText = d.entitleLabel;
+      document.getElementById('txtQuotaTotal').innerText = d.quotaTotal;
+      document.getElementById('txtItemRice').innerText = d.itemRice;
+      document.getElementById('txtItemWheat').innerText = d.itemWheat;
+      document.getElementById('txtItemSugar').innerText = d.itemSugar;
+      document.getElementById('txtSelectSlotLabel').innerText = d.slotLabel;
+      document.getElementById('slot1Title').innerText = d.slot1Title;
+      document.getElementById('slot1Fast').innerText = d.slot1Fast;
+      document.getElementById('slot2Title').innerText = d.slot2Title;
+      document.getElementById('slot2Fast').innerText = d.slot2Fast;
+      document.getElementById('txtBookBtn').innerText = d.bookBtn;
+      document.getElementById('txtTokenNote').innerText = d.tokenNote;
+      document.getElementById('txtConfirmedSlotTime').innerText = d.confirmedTime;
+      document.getElementById('txtQuotaLockedHeading').innerText = d.quotaLocked;
+      const saveBtn = document.getElementById('txtSaveToken');
+      if (saveBtn) saveBtn.innerText = d.saveToken;
+      document.getElementById('txtNearbyShops').innerText = d.nearbyShops;
+      document.getElementById('txtOnorcDesc').innerText = d.onorcDesc;
+      document.getElementById('txtHelpHeading').innerText = d.helpHead;
+      document.getElementById('txtHelpSub').innerText = d.helpSub;
+      document.getElementById('navHome').innerText = d.home;
+      const navMapEl = document.getElementById('navMap');
+      if (navMapEl) navMapEl.innerText = d.navMap;
+      document.getElementById('navToken').innerText = d.tokenNav;
+      document.getElementById('navHistory').innerText = d.history;
+      document.getElementById('navFamily').innerText = d.familyNav;
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'hi' ? 'en' : 'hi';
+      document.getElementById('langToggleBtn').innerText = currentLang === 'hi' ? '🌐 English' : '🌐 हिन्दी';
+      updateLanguageUI();
+    }
+
+    function selectSlotTime(slot) {
+      selectedSlot = slot;
+      const b1 = document.getElementById('slotBtn1');
+      const b2 = document.getElementById('slotBtn2');
+      if (slot === 'today_4pm') {
+        b1.className = "slot-option border-2 border-emerald-500 bg-emerald-50 text-emerald-950 font-bold p-2 rounded-xl text-left transition";
+        b2.className = "slot-option border border-slate-200 bg-white text-slate-700 font-medium p-2 rounded-xl text-left hover:border-slate-300 transition";
+      } else {
+        b2.className = "slot-option border-2 border-emerald-500 bg-emerald-50 text-emerald-950 font-bold p-2 rounded-xl text-left transition";
+        b1.className = "slot-option border border-slate-200 bg-white text-slate-700 font-medium p-2 rounded-xl text-left hover:border-slate-300 transition";
+      }
+    }
+
+    function bookGuaranteedSlot() {
+      hasBookedToken = true;
+      document.getElementById('unbookedSlotSection').classList.add('hidden');
+      document.getElementById('bookedTokenSection').classList.remove('hidden');
+      
+      // Update dealer scanned preview
+      document.getElementById('dealerScannedUser').innerText = `${currentCollector} (TK-482 - Locked)`;
+      document.getElementById('dealerAuthStatus').innerText = "Token Valid (Slot 4:00 PM)";
+    }
+
+    function downloadTokenPass() {
+      alert("📥 TOKEN PASS SAVED:\nToken #TK-482 has been saved locally on this device for offline verification. Valid for 24 hours at Shop #402.");
+    }
+
+    function simulateDealerScanFromApp() {
+      switchView('dealer');
+      dealerScanAction();
+    }
+
+    function cancelTokenBooking() {
+      hasBookedToken = false;
+      document.getElementById('bookedTokenSection').classList.add('hidden');
+      document.getElementById('unbookedSlotSection').classList.remove('hidden');
+      document.getElementById('dealerScannedUser').innerText = "Waiting for Scan...";
+      document.getElementById('dealerAuthStatus').innerText = "Ready";
+    }
+
+    // Toggle Offline Simulation (Testing Risk 3)
+    function toggleOfflineSim() {
+      isOffline = !isOffline;
+      const btn = document.getElementById('networkToggleBtn');
+      if (isOffline) {
+        btn.innerText = "📵 No Network (Offline)";
+        btn.className = "px-2 py-0.5 rounded bg-rose-200 text-[11px] font-bold text-rose-800 transition animate-pulse";
+        alert("SIMULATING OFFLINE MODE: The app switches to offline cryptographic mode. Your QR token is verified using local public key cryptography on the dealer's e-PoS device without cellular data!");
+      } else {
+        btn.innerText = "📶 Online Mode";
+        btn.className = "px-2 py-0.5 rounded bg-slate-200 hover:bg-slate-300 text-[11px] font-semibold text-slate-700 transition";
+      }
+    }
+
+    // Simulator Scenarios (Testing the Unknown)
+    function simulateScenario(type) {
+      const box = document.getElementById('simulationOutputBox');
+      const title = document.getElementById('simTitle');
+      const log = document.getElementById('simLogContent');
+      box.classList.remove('hidden');
+
+      if (type === 'crowd') {
+        title.innerText = "🚨 Friction Test: 50 Walk-ins vs. Digital Token Priority";
+        log.innerHTML = `
+          <div class="text-amber-400 font-bold">[16:02:11] Ramesh arrives at FPS #402. Physical line has 42 people.</div>
+          <div class="text-slate-300">[16:02:14] Walk-in crowd shouts: "We stood since 8 AM! No special VIP line!"</div>
+          <div class="text-emerald-400 font-bold">[DESIGN INTERVENTION 1]: Digital Queue Buffer Protocol</div>
+          <div class="text-slate-200 pl-2">➔ Dealer terminal enforces <strong>1 Digital Token served for every 2 Walk-ins</strong>, preventing riot-like friction while giving guaranteed throughput to token holders within 15 mins.</div>
+          <div class="text-emerald-400 font-bold">[DESIGN INTERVENTION 2]: Public Queue Display Board</div>
+          <div class="text-slate-200 pl-2">➔ Digital queue screen outside shop displays: <em>"Token #482 booked at 11 AM - allotted 4:15 PM slot."</em> Walk-ins visually see the reservation protocol is transparent and equitable.</div>
+          <div class="text-indigo-300 font-bold mt-1">✔ Outcome: Friction resolved through visible queue display and orderly intake.</div>
+        `;
+      } else if (type === 'biometric') {
+        title.innerText = "✋ Biometric Stress Test: Fingerprint Failure at POS";
+        log.innerHTML = `
+          <div class="text-amber-400 font-bold">[16:15:02] Ramesh scans thumb on e-PoS. Biometric match: FAILED (score 21%, worn ridges from cement work).</div>
+          <div class="text-amber-400 font-bold">[16:15:08] Attempt 2: FAILED. Attempt 3: FAILED.</div>
+          <div class="text-rose-400">[Traditional PDS Flaw]: Dealer turns beneficiary away empty-handed; day's wage lost.</div>
+          <div class="text-emerald-400 font-bold">[RATIONSETU FAILSAFE]: Multi-Tier Identity Fallback</div>
+          <div class="text-slate-200 pl-2">1. The Digital Token contains an encrypted Aadhaar OTP seed generated during booking.</div>
+          <div class="text-slate-200 pl-2">2. Dealer POS triggers Iris Scan fallback camera OR Family Nominee Authorization.</div>
+          <div class="text-slate-200 pl-2">3. If optical fails, dealer taps 'Guardian OTP' sent to beneficiary's verified mobile.</div>
+          <div class="text-indigo-300 font-bold mt-1">✔ Outcome: 100% quota dispensed without denial of genuine entitlement.</div>
+        `;
+      } else if (type === 'offline') {
+        title.innerText = "🌐 Network Blackout Test: Zero Cellular Signal";
+        log.innerHTML = `
+          <div class="text-amber-400 font-bold">[16:20:00] Village cell tower down. Dealer e-PoS indicates: NO SIGNAL (0 Bars).</div>
+          <div class="text-slate-300">[16:20:03] Beneficiary phone is in offline mode.</div>
+          <div class="text-emerald-400 font-bold">[DESIGN SOLUTION]: Asymmetric Cryptographic QR Code</div>
+          <div class="text-slate-200 pl-2">➔ Token #TK-482 was signed with State Food Department's private ECDSA key at booking.</div>
+          <div class="text-slate-200 pl-2">➔ Dealer's offline scanner uses pre-loaded public key to verify token authenticity in &lt; 200 milliseconds.</div>
+          <div class="text-slate-200 pl-2">➔ Transaction stored in encrypted local ledger and auto-synced once connectivity restores.</div>
+          <div class="text-indigo-300 font-bold mt-1">✔ Outcome: Zero downtime; zero beneficiaries turned away.</div>
+        `;
+      }
+    }
+
+    // Dealer Simulation Actions
+    function dealerScanAction() {
+      if (!hasBookedToken) {
+        alert("Please book a slot first on the Beneficiary phone screen (click 'Lock My Quota') to generate a valid token to scan!");
+        return;
+      }
+      document.getElementById('dealerScannedUser').innerText = `${currentCollector} (TK-482)`;
+      document.getElementById('dealerAuthStatus').innerText = "✅ Cryptographic Match (30 kg Ready)";
+    }
+
+    function dealerDispenseSuccess() {
+      if (!hasBookedToken) {
+        alert("No active token to dispense. Book a token first!");
+        return;
+      }
+      alert("✅ TRANSACTION COMPLETE:\n- Rice: 20 kg dispensed\n- Wheat: 10 kg dispensed\n- Total Amount: ₹0 (NFSA Free Scheme)\nDigital receipt sent via SMS & updated on beneficiary passbook!");
+      document.getElementById('dealerScannedUser').innerText = "Dispensed Successfully ✔";
+      document.getElementById('dealerAuthStatus').innerText = "Quota Complete (0 kg pending)";
+    }
+
+    // Grievance SOS
+    function triggerGrievanceSOS() {
+      const confirmed = confirm("Are you sure you want to trigger a Geo-Verified Grievance Alert? This notifies the District Food Supply Officer (DFSO) with GPS timestamp.");
+      if (confirmed) {
+        alert("🚨 GRIEVANCE REGISTERED:\nTicket ID: #GRV-98124\nLocation: Shop #402 (12.9716° N, 77.5946° E)\nAn inquiry alert has been forwarded to Inspector V. Verma. Dealer will receive an automated compliance audit call within 10 minutes.");
+      }
+    }
+
+    // View toggling
+    function switchView(view) {
+      const bBtn = document.getElementById('viewBeneficiaryBtn');
+      const dBtn = document.getElementById('viewDealerBtn');
+      const dealerCard = document.getElementById('dealerTerminalCard');
+      
+      if (view === 'beneficiary') {
+        bBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 shadow transition";
+        dBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+        document.getElementById('phoneScreen').scrollIntoView({ behavior: 'smooth' });
+      } else {
+        dBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-500 text-white shadow transition";
+        bBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+        dealerCard.scrollIntoView({ behavior: 'smooth' });
+        dealerCard.classList.add('ring-2', 'ring-indigo-400');
+        setTimeout(() => dealerCard.classList.remove('ring-2', 'ring-indigo-400'), 2000);
+      }
+    }
+
+    function toggleDtModal() {
+      const m = document.getElementById('dtModal');
+      m.classList.toggle('hidden');
+    }
+
+    function scrollToHeroToken() {
+      document.getElementById('heroSingleElementCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function showTransactionHistory() {
+      alert("📜 PASSBOOK (LAST 3 MONTHS):\n- Sept 2026: 30 kg Grains (Collected 14 Sept) - Success\n- Aug 2026: 30 kg Grains (Collected 08 Aug) - Success\n- July 2026: 30 kg Grains (Collected 12 July) - Success");
+    }
+
+    function showFamilyCard() {
+      alert("👥 REGISTERED FAMILY MEMBERS (AAY):\n1. Ramesh Kumar (Self, 44) - Aadhaar ***4912\n2. Sunita Devi (Spouse, 40) - Aadhaar ***8120\n3. Amit Kumar (Son, 16) - Aadhaar ***3391\n4. Pooja Kumari (Daughter, 12) - Aadhaar ***0941");
+    }
+
+    // Initial setup
+    updateLanguageUI();
+  </script>
+</body>
+</html>
